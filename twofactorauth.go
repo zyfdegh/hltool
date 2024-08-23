@@ -10,8 +10,6 @@ import (
 	"encoding/base32"
 	"fmt"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -145,38 +143,4 @@ func TwoStepAuthGenNumber(t *TOTP) (string, int64, error) {
 	secondsRemaining := 30 - (epochSeconds % 30)
 
 	return fmt.Sprintf("%06d", pwd), secondsRemaining, nil
-}
-
-// TwoStepAuthGenByQRCode 解析二维码图片
-func TwoStepAuthParseQRCode(qrcodePath string) (*TOTP, error) {
-	f, err := os.Open(qrcodePath)
-	if err != nil {
-		return nil, err
-	}
-	content, err := QRCodeParse(f)
-	if err != nil {
-		return nil, err
-	}
-
-	r, err := totpURLParse(content)
-	if err != nil {
-		return nil, err
-	}
-
-	totp := &TOTP{SecretKey: r["secret"][0]}
-
-	if _, ok := r["algorithm"]; ok {
-		totp.Algorithm = r["algorithm"][0]
-	}
-
-	if _, ok := r["issuer"]; ok {
-		totp.Issuer = r["issuer"][0]
-	}
-
-	if _, ok := r["digits"]; ok {
-		i, _ := strconv.Atoi(r["digits"][0])
-		totp.Digits = i
-	}
-
-	return totp, nil
 }
